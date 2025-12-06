@@ -74,7 +74,7 @@ func (r *Repository) BuyShares(ctx context.Context, userId, companyId string, nu
 
 	if currentShares < numShares {
 		fmt.Printf("Not enough shares available for company %s. Requested: %d, Available: %d\n", companyId, numShares, currentShares)
-		return errors.New("Not enought shares")
+		return errors.New("not enought shares")
 	}
 
 	currentShares -= numShares
@@ -112,3 +112,26 @@ func (r *Repository) InitializeCompanyShares(ctx context.Context, companyId stri
     fmt.Printf("Initialized company %s with %d shares\n", companyId, initialShares)
     return nil
 }
+
+func (r *Repository) GetCompanyShares(ctx context.Context, companyId string) (int, error) {
+    shares, err := r.client.Get(ctx, BuildCompanySharesKey(companyId)).Int()
+    if err != nil {
+        if err == goredislib.Nil {
+            return 0, nil
+        }
+        return 0, err
+    }
+    return shares, nil
+}
+
+func (r *Repository) GetUserShares(ctx context.Context, userId, companyId string) (int, error) {
+    shares, err := r.client.Get(ctx, BuildUserSharesKey(userId, companyId)).Int()
+    if err != nil {
+        if err == goredislib.Nil {
+            return 0, nil
+        }
+        return 0, err
+    }
+    return shares, nil
+}
+
